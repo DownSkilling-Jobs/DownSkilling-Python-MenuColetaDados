@@ -1,11 +1,16 @@
 from openpyxl.utils.dataframe import dataframe_to_rows
+import datetime as dt
 import openpyxl as xl
 import pandas as pd
+
+TabList = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ']
+today = dt.date.today()
+current_month_index = today.month - 1
 
 def merge_csv_to_excel(csv_file, excel_file, output_file):
     # Load the existing Excel workbook
     workbook = xl.load_workbook(excel_file)
-    sheet = workbook.active
+    sheet = workbook[TabList[current_month_index]]
 
     style = xl.styles.NamedStyle(name="standard_style")
     style.font = xl.styles.Font(name='Aptos', size=11)
