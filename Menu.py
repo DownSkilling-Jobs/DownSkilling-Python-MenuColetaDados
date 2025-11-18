@@ -16,6 +16,8 @@ import os
 # ### titulos
 
 # %%
+## Titulos do menu
+
 titulo_empresa = """
  ██████████                                                               
 ▒▒███▒▒▒▒▒█                                                               
@@ -64,6 +66,8 @@ alterar_titulo = '''
 # 
 
 # %%
+## Variaveis globais
+
 debug = True
 TabList = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ']
 today = dt.date.today()
@@ -85,7 +89,7 @@ output_file = os.path.join(os.path.expanduser('~'), 'Downloads', f'Gastos-{today
 # %%
 def carregar_dados():
     '''
-    Carrega os dados do arquivo CSV para o DataFrame pandas
+    Carrega os dados do arquivo CSV para o DataFrame pandas em uma variavel global
     '''
     global dados
     dados = pd.read_csv(csv_file)
@@ -165,6 +169,11 @@ def converter_input_numero_pagina(input_numero_pagina):
 def paginacao(tabela, subtitulo=str):
     '''
     Função que implementa a paginação para exibir a tabela em partes para o usuario.
+    Inputs:
+    - tabela: pd.DataFrame - a tabela de dados a ser exibida
+    - subtitulo: str - o texto do subtitulo a ser exibido
+    Outputs:
+    - Exibe a tabela paginada na tela de forma interativa
     '''
     exibir_subtitulo(subtitulo)
     
@@ -194,13 +203,10 @@ def paginacao(tabela, subtitulo=str):
             voltar_ao_menu_principal()
     
 def visualizar_dados():
-    '''Lista jogadoras registradas no banco de dados
-    
-    Inputs:
-    - Dictionary de jogadoras
+    '''Lista dados registrados
     
     Outputs:
-    - Exibe lista de jogadoras na tela
+    - Exibe lista de dados na tela
     
     '''
     global dados
@@ -216,11 +222,14 @@ def visualizar_dados():
 # ## Registrar
 
 # %%
+# Padrões de regex para validação de datas
+
 regex_pattern_date01 = r'[0-9]{4}-[0-9]{2}-[0-9]{2}'
 regex_pattern_date04 = r'[0-9]{4}/[0-9]{2}/[0-9]{2}'
 regex_pattern_date02 = r'[0-9]{2}/[0-9]{2}/[0-9]{4}'
 regex_pattern_date03 = r'[0-9]{2}-[0-9]{2}-[0-9]{4}'
 
+# Dicionario para converter o valor retornado por weekday() em dia da semana em portugues
 dias_da_semana = {
     0: 'Segunda-feira',
     1: 'Terça-feira',
@@ -232,7 +241,15 @@ dias_da_semana = {
 }
 
 def request_date(texto):
-    date_input = input(f"Insira a data de {texto} (no formato AAAA-MM-DD) ou enter para sair: ")
+    '''
+    Solicita ao usuario uma data e valida se a data é valida. 
+    Requisita que a data seja inserida no formato AAAA-MM-DD, porém aceita outros formatos comuns.
+    Inputs:
+    - texto: str - o texto a ser exibido na solicitacao da data
+    Outputs:
+    - data: date - a data inserida pelo usuario, ou None se o usuario optar por sair
+    '''
+    date_input = input(f"Insira a data de {texto} (no formato AAAA-MM-DD): ")
 
     try:
         if re.fullmatch(regex_pattern_date01, date_input):
@@ -267,6 +284,11 @@ def request_date(texto):
 
 # %%
 def registrar_gasto(tipo, data_emissao, fornecedor, data_pagamento, nNF, valor, valor_icms, valor_cofins, valor_pis, valor_ipi):
+    '''
+    Registra um novo gasto no DataFrame e salva no arquivo CSV
+    Se debug estiver ativo, as mudanças são salvas em um arquivo separado para debug
+    
+    '''
     novo_gasto = {
         'Tipo': tipo,
         'Data de emissão': data_emissao,
@@ -285,6 +307,14 @@ def registrar_gasto(tipo, data_emissao, fornecedor, data_pagamento, nNF, valor, 
     print("Gasto registrado com sucesso!")
 
 def input_valor_monetario(prompt):
+    '''
+    Solicita ao usuario um valor monetario e valida se o valor é valido.
+    Aceita valores com até duas casas decimais e permite o uso de vírgula como separador decimal.
+    Inputs:
+    - prompt: str - o texto a ser exibido na solicitacao do valor
+    Outputs:
+    - valor: float - o valor monetario inserido pelo usuario, ou '' se o usuario optar por sair
+    '''
     valor_str = 'valor'
     while True and valor_str != '':
         valor_str = input(prompt).replace(',', '.')
@@ -296,6 +326,11 @@ def input_valor_monetario(prompt):
     return ''
 
 def registro_manual(tipo):
+    '''
+    Registra um gasto manualmente solicitando os dados ao usuario.
+    Inputs:
+    - tipo: str - o tipo do gasto a ser registrado (C, D ou S)
+    '''
     tipo = tipo.upper()
     print(f"\nRegistrando gasto do tipo: {tipo}")
     fornecedor = input("Fornecedor: ")
@@ -340,6 +375,11 @@ def registro_manual(tipo):
 
 # %%
 def registro_automatico():
+    '''
+    Registra gastos automaticamente verificando todos os arquivos XML na pasta ./src/Data/xml
+    Iterando um por um, a função extrai os dados necessarios e registra o gasto no DataFrame.
+    Após salva os gastos no arquivo CSV. (Se debug estiver ativo, salva em um arquivo separado)
+    '''
     for file in os.listdir('./src/Data/xml'):
         if file.endswith('.xml'):
             caminho_arquivo = os.path.join('./src/Data/xml', file)
@@ -420,11 +460,19 @@ def menu_registrar_dados():
 # ## Visualizar
 
 # %%
-def merge_csv_to_excel(csv_file, excel_file, output_file):
-    # Load the existing Excel workbook
+def salvar_dados_em_excel(excel_file, output_file):
+    '''
+    Salva os dados em uma planilha Excel 'template' existente,
+    aplicando estilos e formatos específicos para valores monetários.
+    Inputs:
+    - excel_file: str - caminho para o arquivo Excel 'template' existente
+    - output_file: str - caminho para salvar o arquivo Excel atualizado
+    '''
+    # Carrega a planilha Excel 'template' existente
     workbook = xl.load_workbook(excel_file)
     sheet = workbook[TabList[current_month_index]]
 
+    # Define o estilo padrão para as células que serão preenchidas
     style = xl.styles.NamedStyle(name="standard_style")
     style.font = xl.styles.Font(name='Aptos', size=11)
     style.alignment = xl.styles.Alignment(horizontal='center', vertical='center')
@@ -436,30 +484,33 @@ def merge_csv_to_excel(csv_file, excel_file, output_file):
     )
     workbook.add_named_style(style)
 
-    # Read the CSV file into a DataFrame
-    df = pd.read_csv(csv_file)
+    global dados
 
-    # Append the DataFrame to the Excel sheet
-    for r in dataframe_to_rows(df, index=False, header=False):
+    # Coloca os dados do DataFrame na planilha Excel
+    for r in dataframe_to_rows(dados, index=False, header=False):
         if 'current_row' not in locals():
             current_row = 3
         for col_idx, value in enumerate(r, start=1):
             sheet.cell(row=current_row, column=col_idx, value=value)
             sheet.cell(row=current_row, column=col_idx).style = "standard_style"
-            if col_idx in [ 5, 7, 8, 9, 10 ]:  # Columns with monetary values
+            if col_idx in [ 5, 7, 8, 9, 10 ]:  # Colunas monetárias
                 sheet.cell(row=current_row, column=col_idx).number_format = 'R$ #,##0.00'
             
         current_row += 1
 
+    # Muda a aba ativa para a do mes atual
     workbook.active = workbook[TabList[current_month_index]]
-    # Save the updated workbook to a new file
+    # Salva o arquivo Excel atualizado
     workbook.save(output_file)
 
 # %%
 def salvar_arquivo_excel():
-    '''Salva o arquivo excel com os dados coletados'''
+    '''
+    Salva o arquivo excel com os dados coletados
+    (Um timer foi adicionado para garantir que a notificação ao usuario de falha ou sucesso esteja correta)
+    '''
     try:
-        merge_csv_to_excel(save_csv_file, excel_file, output_file)
+        salvar_dados_em_excel(excel_file, output_file)
     except Exception as e:
         print(f'Erro ao salvar: {e}')
         voltar_ao_menu_principal()
@@ -480,6 +531,13 @@ def salvar_arquivo_excel():
 
 # %%
 def filtrar_dados(tipo=None):
+    '''
+    Filtra os dados com base no tipo fornecido.
+    Inputs:
+    - tipo: str ou None - o tipo de dado a ser filtrado. Se None, retorna todos os dados.
+    Outputs:
+    - pd.DataFrame - a tabela filtrada
+    '''
     global dados
     df_filtrado = dados.copy()
 
@@ -490,15 +548,22 @@ def filtrar_dados(tipo=None):
 
 # %%
 def visualizar_por_categoria():
-    '''Visualiza os dados filtrados por categoria'''
+    '''
+    Visualiza os dados filtrados por categoria
+    Utilizando a função paginação para exibir apenas 10 linhas por vez
+    '''
     tipo = input('Insira o tipo de despesa (C para Compras, D para Despesas, S para Serviços): ').strip().upper()
+    if tipo not in ['C', 'D', 'S']:
+        print('Tipo inválido. Retornando ao menu principal.')
+        voltar_ao_menu_principal()
+        return
     dados_filtrados = filtrar_dados(tipo=tipo)
     paginacao(dados_filtrados, f"Dados Filtrados por Tipo: {tipo}")
     voltar_ao_menu_principal()
 
 # %%
 def exibir_opcoes_visualizar():
-    '''Exibe todas as opcoes de input do usuario do menu registrar dados'''
+    '''Exibe todas as opcoes de input do usuario do menu visualizar dados'''
     print('1. Visualizar todos os dados')
     print('2. Visualizar por Categorias')
     print('3. Salvar Arquivo Excel')
@@ -540,8 +605,63 @@ def menu_visualizar_dados():
 # ## Alterar
 
 # %%
+def alterar_dados(indice):
+    '''
+    Altera os dados de um gasto especificado pelo indice no DataFrame e salva no arquivo CSV
+    Função re-utilizada em todas as funções de alteração de dados
+    
+    Inputs:
+    - indice: int - o índice do gasto a ser alterado
+    '''
+
+    global dados
+    global save_csv_file
+    novo_fornecedor = input(f"Fornecedor atual ({dados.at[indice, 'Fornecedor']}), novo valor (pressione Enter para manter): ")
+    if novo_fornecedor:
+        dados.at[indice, 'Fornecedor'] = novo_fornecedor
+
+    nova_data_emissao = request_date("Emissão (pressione Enter para manter)")
+    if nova_data_emissao:
+        dados.at[indice, 'Data de emissão'] = nova_data_emissao
+
+    nova_data_pagamento = request_date("Vencimento (pressione Enter para manter)")
+    if nova_data_pagamento:
+        dados.at[indice, 'Data de Vencimento'] = nova_data_pagamento
+
+    novo_valor = input_valor_monetario(f"V. Total da NF atual (R$ {dados.at[indice, 'V. Total da NF']}), novo valor (pressione Enter para manter): R$ ")
+    if novo_valor != '':
+        dados.at[indice, 'V. Total da NF'] = novo_valor
+
+    novo_valor_icms = input_valor_monetario(f"ICMS atual (R$ {dados.at[indice, 'ICMS']}), novo valor (pressione Enter para manter): R$ ")
+    if novo_valor_icms != '':
+        dados.at[indice, 'ICMS'] = novo_valor_icms
+
+    novo_valor_cofins = input_valor_monetario(f"COFINS atual (R$ {dados.at[indice, 'COFINS']}), novo valor (pressione Enter para manter): R$ ")
+    if novo_valor_cofins != '':
+        dados.at[indice, 'COFINS'] = novo_valor_cofins
+
+    novo_valor_pis = input_valor_monetario(f"PIS atual (R$ {dados.at[indice, 'PIS']}), novo valor (pressione Enter para manter): R$ ")
+    if novo_valor_pis != '':
+        dados.at[indice, 'PIS'] = novo_valor_pis
+
+    novo_valor_ipi = input_valor_monetario(f"IPI atual (R$ {dados.at[indice, 'IPI']}), novo valor (pressione Enter para manter): R$ ")
+    if novo_valor_ipi != '':
+        dados.at[indice, 'IPI'] = novo_valor_ipi
+
+        if novo_fornecedor or nova_data_emissao or nova_data_pagamento or novo_valor != '' or novo_valor_icms != '' or novo_valor_cofins != '' or novo_valor_pis != '' or novo_valor_ipi != '':
+            dados.to_csv(save_csv_file, index=False)
+            print("Dados alterados com sucesso!")
+        else:
+            print("Nenhum dado foi alterado.")
+
+
+# %%
 def alterar_por_nNF():
-    '''Altera os dados de uma despesa baseado no N° da NF'''
+    '''
+    Altera os dados de uma despesa baseado no N° da NF
+    Se o N° da NF for duplicado, solicita o indice do registro a ser alterado
+    Após alterar os dados, salva no arquivo CSV (ou arquivo de debug se debug estiver ativo)
+    '''
 
     exibir_subtitulo("Alterar registro por N° da NF")
     nNF_input = input("Insira o N° da NF que deseja alterar: ")
@@ -576,43 +696,8 @@ def alterar_por_nNF():
 
     print(f"Alterando dados para a NF {nNF_input}:")
     
-    novo_fornecedor = input(f"Fornecedor atual ({dados.at[indice, 'Fornecedor']}), novo valor (pressione Enter para manter): ")
-    if novo_fornecedor:
-        dados.at[indice, 'Fornecedor'] = novo_fornecedor
-
-    nova_data_emissao = request_date("Emissão (pressione Enter para manter)")
-    if nova_data_emissao:
-        dados.at[indice, 'Data de emissão'] = nova_data_emissao
-
-    nova_data_pagamento = request_date("Vencimento (pressione Enter para manter)")
-    if nova_data_pagamento:
-        dados.at[indice, 'Data de Vencimento'] = nova_data_pagamento
-
-    novo_valor = input_valor_monetario(f"V. Total da NF atual (R$ {dados.at[indice, 'V. Total da NF']}), novo valor (pressione Enter para manter): R$ ")
-    if novo_valor != '':
-        dados.at[indice, 'V. Total da NF'] = novo_valor
-
-    novo_valor_icms = input_valor_monetario(f"ICMS atual (R$ {dados.at[indice, 'ICMS']}), novo valor (pressione Enter para manter): R$ ")
-    if novo_valor_icms != '':
-        dados.at[indice, 'ICMS'] = novo_valor_icms
-
-    novo_valor_cofins = input_valor_monetario(f"COFINS atual (R$ {dados.at[indice, 'COFINS']}), novo valor (pressione Enter para manter): R$ ")
-    if novo_valor_cofins != '':
-        dados.at[indice, 'COFINS'] = novo_valor_cofins
-
-    novo_valor_pis = input_valor_monetario(f"PIS atual (R$ {dados.at[indice, 'PIS']}), novo valor (pressione Enter para manter): R$ ")
-    if novo_valor_pis != '':
-        dados.at[indice, 'PIS'] = novo_valor_pis
-
-    novo_valor_ipi = input_valor_monetario(f"IPI atual (R$ {dados.at[indice, 'IPI']}), novo valor (pressione Enter para manter): R$ ")
-    if novo_valor_ipi != '':
-        dados.at[indice, 'IPI'] = novo_valor_ipi
-
-    if novo_fornecedor or nova_data_emissao or nova_data_pagamento or novo_valor != '' or novo_valor_icms != '' or novo_valor_cofins != '' or novo_valor_pis != '' or novo_valor_ipi != '':
-        dados.to_csv(save_csv_file, index=False)
-        print("Dados alterados com sucesso!")
-    else:
-        print("Nenhum dado foi alterado.")
+    # Chama a função de alterar dados
+    alterar_dados(indice)
     
     input('\nDigite uma tecla para voltar ao menu.')
     menu_alterar_dados()
@@ -621,7 +706,11 @@ def alterar_por_nNF():
 
 # %%
 def alterar_por_data_emissao():
-    '''Altera os dados de uma despesa baseado na Data de Emissão'''
+    '''
+    Altera os dados de uma despesa baseado na Data de Emissão
+    Após receber a data de emissão, exibe todos os registros encontrados
+    Solicita o N° da NF para identificar o registro a ser alterado
+    '''
 
     exibir_subtitulo("Alterar registro por Data de Emissão")
     
@@ -646,7 +735,7 @@ def alterar_por_data_emissao():
     try:
         nNF_input = int(nNF_input)
     except ValueError:
-        print("Número da NF inválido. Retornando ao menu...")
+        print("Valor inserido inválido. Retornando ao menu...")
         menu_alterar_dados()
         return
 
@@ -658,50 +747,18 @@ def alterar_por_data_emissao():
     indice = dados.index[dados['N° da NF'] == nNF_input][0]
     print(f"Alterando dados para a NF {nNF_input}:")
     
-    novo_fornecedor = input(f"Fornecedor atual ({dados.at[indice, 'Fornecedor']}), novo valor (pressione Enter para manter): ")
-    if novo_fornecedor:
-        dados.at[indice, 'Fornecedor'] = novo_fornecedor
-
-    nova_data_emissao = request_date("Emissão (pressione Enter para manter)")
-    if nova_data_emissao:
-        dados.at[indice, 'Data de emissão'] = nova_data_emissao
-
-    nova_data_pagamento = request_date("Vencimento (pressione Enter para manter)")
-    if nova_data_pagamento:
-        dados.at[indice, 'Data de Vencimento'] = nova_data_pagamento
-
-    novo_valor = input_valor_monetario(f"V. Total da NF atual (R$ {dados.at[indice, 'V. Total da NF']}), novo valor (pressione Enter para manter): R$ ")
-    if novo_valor != '':
-        dados.at[indice, 'V. Total da NF'] = novo_valor
-
-    novo_valor_icms = input_valor_monetario(f"ICMS atual (R$ {dados.at[indice, 'ICMS']}), novo valor (pressione Enter para manter): R$ ")
-    if novo_valor_icms != '':
-        dados.at[indice, 'ICMS'] = novo_valor_icms
-
-    novo_valor_cofins = input_valor_monetario(f"COFINS atual (R$ {dados.at[indice, 'COFINS']}), novo valor (pressione Enter para manter): R$ ")
-    if novo_valor_cofins != '':
-        dados.at[indice, 'COFINS'] = novo_valor_cofins
-
-    novo_valor_pis = input_valor_monetario(f"PIS atual (R$ {dados.at[indice, 'PIS']}), novo valor (pressione Enter para manter): R$ ")
-    if novo_valor_pis != '':
-        dados.at[indice, 'PIS'] = novo_valor_pis
-
-    novo_valor_ipi = input_valor_monetario(f"IPI atual (R$ {dados.at[indice, 'IPI']}), novo valor (pressione Enter para manter): R$ ")
-    if novo_valor_ipi != '':
-        dados.at[indice, 'IPI'] = novo_valor_ipi
-
-    if novo_fornecedor or nova_data_emissao or nova_data_pagamento or novo_valor != '' or novo_valor_icms != '' or novo_valor_cofins != '' or novo_valor_pis != '' or novo_valor_ipi != '':
-        dados.to_csv(save_csv_file, index=False)
-        print("Dados alterados com sucesso!")
-    else:
-        print("Nenhum dado foi alterado.")
+    alterar_dados(indice)
     
     input('\nDigite uma tecla para voltar ao menu.')
     menu_alterar_dados()
 
 # %%
 def alterar_por_fornecedor():
-    '''Altera os dados de uma despesa baseado no Fornecedor'''
+    '''
+    Altera os dados de uma despesa baseado no Fornecedor
+    Após receber o nome do fornecedor, exibe todos os registros encontrados
+    Solicita o N° da NF para identificar o registro a ser alterado
+    '''
 
     exibir_subtitulo("Alterar dados por Fornecedor")
 
@@ -738,50 +795,18 @@ def alterar_por_fornecedor():
     indice = dados.index[dados['N° da NF'] == nNF_input][0]
     print(f"Alterando dados para a NF {nNF_input}:")
     
-    novo_fornecedor = input(f"Fornecedor atual ({dados.at[indice, 'Fornecedor']}), novo valor (pressione Enter para manter): ")
-    if novo_fornecedor:
-        dados.at[indice, 'Fornecedor'] = novo_fornecedor
-
-    nova_data_emissao = request_date("Emissão (pressione Enter para manter)")
-    if nova_data_emissao:
-        dados.at[indice, 'Data de emissão'] = nova_data_emissao
-
-    nova_data_pagamento = request_date("Vencimento (pressione Enter para manter)")
-    if nova_data_pagamento:
-        dados.at[indice, 'Data de Vencimento'] = nova_data_pagamento
-
-    novo_valor = input_valor_monetario(f"V. Total da NF atual (R$ {dados.at[indice, 'V. Total da NF']}), novo valor (pressione Enter para manter): R$ ")
-    if novo_valor != '':
-        dados.at[indice, 'V. Total da NF'] = novo_valor
-
-    novo_valor_icms = input_valor_monetario(f"ICMS atual (R$ {dados.at[indice, 'ICMS']}), novo valor (pressione Enter para manter): R$ ")
-    if novo_valor_icms != '':
-        dados.at[indice, 'ICMS'] = novo_valor_icms
-
-    novo_valor_cofins = input_valor_monetario(f"COFINS atual (R$ {dados.at[indice, 'COFINS']}), novo valor (pressione Enter para manter): R$ ")
-    if novo_valor_cofins != '':
-        dados.at[indice, 'COFINS'] = novo_valor_cofins
-
-    novo_valor_pis = input_valor_monetario(f"PIS atual (R$ {dados.at[indice, 'PIS']}), novo valor (pressione Enter para manter): R$ ")
-    if novo_valor_pis != '':
-        dados.at[indice, 'PIS'] = novo_valor_pis
-
-    novo_valor_ipi = input_valor_monetario(f"IPI atual (R$ {dados.at[indice, 'IPI']}), novo valor (pressione Enter para manter): R$ ")
-    if novo_valor_ipi != '':
-        dados.at[indice, 'IPI'] = novo_valor_ipi
-
-    if novo_fornecedor or nova_data_emissao or nova_data_pagamento or novo_valor != '' or novo_valor_icms != '' or novo_valor_cofins != '' or novo_valor_pis != '' or novo_valor_ipi != '':
-        dados.to_csv(save_csv_file, index=False)
-        print("Dados alterados com sucesso!")
-    else:
-        print("Nenhum dado foi alterado.")
+    alterar_dados(indice)
     
     input('\nDigite uma tecla para voltar ao menu.')
     menu_alterar_dados()
 
 # %%
 def alterar_por_data_vencimento():
-    '''Altera os dados de uma despesa baseado na Data de Vencimento'''
+    '''
+    Altera uma despesa baseado na Data de Vencimento
+    Após receber a data de vencimento, exibe todos os registros encontrados
+    Solicita o N° da NF para identificar o registro a ser alterado
+    '''
     
     exibir_subtitulo("Alterar registro por Data de Vencimento")
 
@@ -818,50 +843,21 @@ def alterar_por_data_vencimento():
     indice = dados.index[dados['N° da NF'] == nNF_input][0]
     print(f"Alterando dados para a NF {nNF_input}:")
     
-    novo_fornecedor = input(f"Fornecedor atual ({dados.at[indice, 'Fornecedor']}), novo valor (pressione Enter para manter): ")
-    if novo_fornecedor:
-        dados.at[indice, 'Fornecedor'] = novo_fornecedor
-
-    nova_data_emissao = request_date("Emissão (pressione Enter para manter)")
-    if nova_data_emissao:
-        dados.at[indice, 'Data de emissão'] = nova_data_emissao
-
-    nova_data_pagamento = request_date("Vencimento (pressione Enter para manter)")
-    if nova_data_pagamento:
-        dados.at[indice, 'Data de Vencimento'] = nova_data_pagamento
-
-    novo_valor = input_valor_monetario(f"V. Total da NF atual (R$ {dados.at[indice, 'V. Total da NF']}), novo valor (pressione Enter para manter): R$ ")
-    if novo_valor != '':
-        dados.at[indice, 'V. Total da NF'] = novo_valor
-
-    novo_valor_icms = input_valor_monetario(f"ICMS atual (R$ {dados.at[indice, 'ICMS']}), novo valor (pressione Enter para manter): R$ ")
-    if novo_valor_icms != '':
-        dados.at[indice, 'ICMS'] = novo_valor_icms
-
-    novo_valor_cofins = input_valor_monetario(f"COFINS atual (R$ {dados.at[indice, 'COFINS']}), novo valor (pressione Enter para manter): R$ ")
-    if novo_valor_cofins != '':
-        dados.at[indice, 'COFINS'] = novo_valor_cofins
-
-    novo_valor_pis = input_valor_monetario(f"PIS atual (R$ {dados.at[indice, 'PIS']}), novo valor (pressione Enter para manter): R$ ")
-    if novo_valor_pis != '':
-        dados.at[indice, 'PIS'] = novo_valor_pis
-
-    novo_valor_ipi = input_valor_monetario(f"IPI atual (R$ {dados.at[indice, 'IPI']}), novo valor (pressione Enter para manter): R$ ")
-    if novo_valor_ipi != '':
-        dados.at[indice, 'IPI'] = novo_valor_ipi
-
-    if novo_fornecedor or nova_data_emissao or nova_data_pagamento or novo_valor != '' or novo_valor_icms != '' or novo_valor_cofins != '' or novo_valor_pis != '' or novo_valor_ipi != '':
-        dados.to_csv(save_csv_file, index=False)
-        print("Dados alterados com sucesso!")
-    else:
-        print("Nenhum dado foi alterado.")
+    alterar_dados(indice)
     
     input('\nDigite uma tecla para voltar ao menu.')
     menu_alterar_dados()
 
 # %%
 def apagar_por_nNF():
-    '''Apaga os dados de uma despesa baseado no N° da NF'''
+    '''
+    Apaga os dados de uma despesa baseado no N° da NF
+    Após receber o N° da NF, exibe todos os registros encontrados
+    Solicita o índice para identificar o registro a ser apagado
+    Caso apenas um registro seja encontrado, o unico registro é apagado
+    Porém antes de apagar, solicita confirmação do usuário
+    Após apagar os dados, salva no arquivo CSV (ou arquivo de debug se debug estiver ativo)
+    '''
 
     exibir_subtitulo("Apagar registro por N° da NF")
 
@@ -1025,6 +1021,10 @@ def main_menu():
 
 # %%
 def main():
+    '''
+    Ponto de entrada do programa
+    Carrega os dados ao Dataframe padrão e então exibe o menu ao usuario
+    '''
     carregar_dados()
     main_menu()
 
