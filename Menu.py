@@ -33,22 +33,22 @@ titulo_empresa = """
 """
 
 registrar_titulo = '''
-▀██▀▀█▄                    ██           ▄                   
- ██   ██    ▄▄▄▄    ▄▄▄ ▄ ▄▄▄   ▄▄▄▄  ▄██▄   ▄▄▄▄   ▄▄▄ ▄▄  
- ██▀▀█▀   ▄█▄▄▄██  ██ ██   ██  ██▄ ▀   ██   ▀▀ ▄██   ██▀ ▀▀ 
- ██   █▄  ██        █▀▀    ██  ▄ ▀█▄▄  ██   ▄█▀ ██   ██     
-▄██▄  ▀█▀  ▀█▄▄▄▀  ▀████▄ ▄██▄ █▀▄▄█▀  ▀█▄▀ ▀█▄▄▀█▀ ▄██▄    
-                  ▄█▄▄▄▄▀                                   
-                                                            
+▀██▀▀█▄                    ██           ▄                           
+ ██   ██    ▄▄▄▄    ▄▄▄ ▄ ▄▄▄   ▄▄▄▄  ▄██▄  ▄▄▄ ▄▄   ▄▄▄▄   ▄▄▄ ▄▄  
+ ██▀▀█▀   ▄█▄▄▄██  ██ ██   ██  ██▄ ▀   ██    ██▀ ▀▀ ▀▀ ▄██   ██▀ ▀▀ 
+ ██   █▄  ██        █▀▀    ██  ▄ ▀█▄▄  ██    ██     ▄█▀ ██   ██     
+▄██▄  ▀█▀  ▀█▄▄▄▀  ▀████▄ ▄██▄ █▀▄▄█▀  ▀█▄▀ ▄██▄    ▀█▄▄▀█▀ ▄██▄    
+                  ▄█▄▄▄▄▀                                           
+                                                                                                                              
 '''
 
 visualizar_titulo = '''
 ▀██▀  ▀█▀  ██                          ▀██   ██                          
- ▀█▄  ▄▀  ▄▄▄   ▄▄▄▄   ▄▄▄▄   ▄▄▄ ▄▄▄   ██  ▄▄▄  ▄▄▄▄▄▄   ▄▄▄▄   ▄▄▄ ▄▄  
-  ██  █    ██  ██▄ ▀  ▀▀ ▄██   ██  ██   ██   ██  ▀  ▄█▀  ▀▀ ▄██   ██▀ ▀▀ 
-   ███     ██  ▄ ▀█▄▄ ▄█▀ ██   ██  ██   ██   ██   ▄█▀    ▄█▀ ██   ██     
-    █     ▄██▄ █▀▄▄█▀ ▀█▄▄▀█▀  ▀█▄▄▀█▄ ▄██▄ ▄██▄ ██▄▄▄▄█ ▀█▄▄▀█▀ ▄██▄                                                                         
-
+ ▀█▄  ▄▀  ▄▄▄   ▄▄▄▄  ▄▄▄ ▄▄▄   ▄▄▄▄    ██  ▄▄▄  ▄▄▄▄▄▄   ▄▄▄▄   ▄▄▄ ▄▄  
+  ██  █    ██  ██▄ ▀   ██  ██  ▀▀ ▄██   ██   ██  ▀  ▄█▀  ▀▀ ▄██   ██▀ ▀▀ 
+   ███     ██  ▄ ▀█▄▄  ██  ██  ▄█▀ ██   ██   ██   ▄█▀    ▄█▀ ██   ██     
+    █     ▄██▄ █▀▄▄█▀  ▀█▄▄▀█▄ ▀█▄▄▀█▀ ▄██▄ ▄██▄ ██▄▄▄▄█ ▀█▄▄▀█▀ ▄██▄    
+                                                              
 '''
 
 alterar_titulo = '''
@@ -57,8 +57,7 @@ alterar_titulo = '''
   █  ██    ██   ██   ▄█▄▄▄██  ██▀ ▀▀ ▀▀ ▄██   ██▀ ▀▀ 
  ▄▀▀▀▀█▄   ██   ██   ██       ██     ▄█▀ ██   ██     
 ▄█▄  ▄██▄ ▄██▄  ▀█▄▀  ▀█▄▄▄▀ ▄██▄    ▀█▄▄▀█▀ ▄██▄    
-                                                     
-                                                     
+                                                                                                    
 '''
 
 # %% [markdown]
@@ -202,18 +201,6 @@ def paginacao(tabela, subtitulo=str):
             print("\nRetornando ao menu principal...\n")
             voltar_ao_menu_principal()
     
-def visualizar_dados():
-    '''Lista dados registrados
-    
-    Outputs:
-    - Exibe lista de dados na tela
-    
-    '''
-    global dados
-
-    paginacao(dados, "Lista de Gastos")
-
-    voltar_ao_menu_principal()
 
 # %% [markdown]
 # # Menus
@@ -460,6 +447,22 @@ def menu_registrar_dados():
 # ## Visualizar
 
 # %%
+def visualizar_dados():
+    '''
+    Lista dados registrados ao usuario usando a função de paginação
+    
+    Outputs:
+    - Exibe lista de dados na tela
+    
+    '''
+    global dados
+
+    paginacao(dados, "Lista de Gastos")
+
+    input('\nDigite uma tecla para voltar ao menu ')
+    menu_visualizar_dados()
+
+# %%
 def salvar_dados_em_excel(excel_file, output_file):
     '''
     Salva os dados em uma planilha Excel 'template' existente,
@@ -527,7 +530,9 @@ def salvar_arquivo_excel():
         print(f'Arquivo salvo com sucesso em na pasta de Downloads como: {os.path.basename(output_file)}')
     else:
         print('Erro ao salvar o arquivo. Feche o Excel e tente novamente.')
-    voltar_ao_menu_principal()
+
+    input('\nDigite uma tecla para voltar ao menu ')
+    menu_visualizar_dados()
 
 # %%
 def filtrar_dados(tipo=None):
@@ -559,7 +564,9 @@ def visualizar_por_categoria():
         return
     dados_filtrados = filtrar_dados(tipo=tipo)
     paginacao(dados_filtrados, f"Dados Filtrados por Tipo: {tipo}")
-    voltar_ao_menu_principal()
+    
+    input('\nDigite uma tecla para voltar ao menu ')
+    menu_visualizar_dados()
 
 # %%
 def exibir_opcoes_visualizar():
